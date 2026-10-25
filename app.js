@@ -7,15 +7,15 @@
 
 // Event handling, user interaction is what starts the code execution.
 
-const taskInput = document.querySelector('.item__text_add'); //Add a new task.
-const addButton = document.querySelector('.item__button_add'); //first button
-const incompleteTaskHolder = document.querySelector('.todo__list'); //ul of .todo__list
-const completedTasksHolder = document.querySelector('.completed__list'); //ul of .completed__list
-let taskCounter = document.querySelectorAll('.item__text').length;
+const addTaskInput = document.querySelector('.item__text_add'); //Add a new task.
+const addTaskButton = document.querySelector('.item__button_add'); //first button
+const todoTasksList = document.querySelector('.list__todo'); //ul of .list__todo
+const completedTasksList = document.querySelector('.list__completed'); //ul of .list__completed
+let nextTaskId = document.querySelectorAll('.item__text').length;
 
 //New task list item
-const createNewTaskElement = function (taskString) {
-  const listItem = document.createElement('li');
+const createNewTaskElement = function (taskTitle) {
+  const taskListItem = document.createElement('li');
 
   //input (checkbox)
   const checkBox = document.createElement('input'); //checkbx
@@ -30,65 +30,62 @@ const createNewTaskElement = function (taskString) {
   const deleteButton = document.createElement('button'); //delete button
   const deleteButtonImg = document.createElement('img'); //delete button image
 
-  listItem.classList.add('item', 'list__item');
+  taskListItem.className = 'item list__item';
 
-  label.innerText = taskString;
+  label.innerText = taskTitle;
   label.className = 'item__label';
-  label.htmlFor = `task-${taskCounter}`;
+  label.htmlFor = `task-${nextTaskId}`;
 
   //Each elements, needs appending
   checkBox.type = 'checkbox';
-  checkBox.classList.add('item__input', 'item__checkbox');
+  checkBox.className = 'item__input item__checkbox';
 
   editInput.type = 'text';
-  editInput.className = 'item__input';
-  editInput.id = `task-${taskCounter}`;
-  editInput.classList.add('item__text', 'item__text_display_none');
+  editInput.className = 'item__input item__text item__text_display_none';
+  editInput.id = `task-${nextTaskId}`;
 
   editButton.innerText = 'Edit'; //innerText encodes special characters, HTML does not.
-  editButton.className = 'item__button';
-  editButton.classList.add('item__button_edit');
+  editButton.className = 'item__button item__button_edit';
 
-  deleteButton.className = 'item__button';
-  deleteButton.classList.add('button-delete', 'item__button_delete');
+  deleteButton.className = 'item__button button-delete item__button_delete';
   deleteButtonImg.src = './remove.svg';
   deleteButtonImg.className = 'button-delete__image';
-  deleteButtonImg.setAttribute('alt', 'remove');
+  deleteButtonImg.alt = 'remove';
   deleteButton.appendChild(deleteButtonImg);
 
-  taskCounter += 1;
+  nextTaskId += 1;
   //and appending.
-  listItem.appendChild(checkBox);
-  listItem.appendChild(label);
-  listItem.appendChild(editInput);
-  listItem.appendChild(editButton);
-  listItem.appendChild(deleteButton);
-  return listItem;
+  taskListItem.appendChild(checkBox);
+  taskListItem.appendChild(label);
+  taskListItem.appendChild(editInput);
+  taskListItem.appendChild(editButton);
+  taskListItem.appendChild(deleteButton);
+  return taskListItem;
 };
 
 const addTask = function () {
   //Create a new list item with the text from the .item__text_add:
-  if (!taskInput.value) return;
-  const listItem = createNewTaskElement(taskInput.value);
+  if (!addTaskInput.value) return;
+  const taskListItem = createNewTaskElement(addTaskInput.value);
 
-  //Append listItem to incompleteTaskHolder
-  incompleteTaskHolder.appendChild(listItem);
-  bindTaskEvents(listItem);
+  //Append taskListItem to todoTasksList
+  todoTasksList.appendChild(taskListItem);
+  bindTaskEvents(taskListItem);
 
-  taskInput.value = '';
+  addTaskInput.value = '';
 };
 
 //Edit an existing task.
 
 const editTask = function () {
-  const listItem = this.parentNode;
+  const taskListItem = this.parentNode;
 
-  const editInput = listItem.querySelector('input[type=text]');
-  const label = listItem.querySelector('label');
-  const editBtn = listItem.querySelector('.item__button_edit');
-  const containsClass = listItem.classList.contains('list__item_edit');
+  const editInput = taskListItem.querySelector('.item__text');
+  const label = taskListItem.querySelector('.item__label');
+  const editBtn = taskListItem.querySelector('.item__button_edit');
+  const isEditing = taskListItem.classList.contains('list__item_edit');
   //If class of the parent is .list__item_edit
-  if (containsClass) {
+  if (isEditing) {
     //switch to .list__item_edit
     //label becomes the inputs value.
     label.innerText = editInput.value;
@@ -99,7 +96,7 @@ const editTask = function () {
   }
 
   //toggle .list__item_edit on the parent.
-  listItem.classList.toggle('list__item_edit');
+  taskListItem.classList.toggle('list__item_edit');
   editInput.classList.toggle('item__text_display_none');
   editInput.classList.toggle('item__text_edit');
   label.classList.toggle('item__label_edit');
@@ -107,18 +104,18 @@ const editTask = function () {
 
 //Delete task.
 const deleteTask = function () {
-  const listItem = this.parentNode;
-  const ul = listItem.parentNode;
+  const taskListItem = this.parentNode;
+  const parentList = taskListItem.parentNode;
   //Remove the parent list item from the ul.
-  ul.removeChild(listItem);
+  parentList.removeChild(taskListItem);
 };
 
-const onTaskCompletionChange = function (listItem) {
-  const taskCheckBox = listItem.querySelector('.item__checkbox');
-  const taskLabel = listItem.querySelector('.item__label');
+const onTaskCompletionChange = function (taskListItem) {
+  const taskCheckBox = taskListItem.querySelector('.item__checkbox');
+  const taskLabel = taskListItem.querySelector('.item__label');
 
   taskLabel.classList.toggle('item__label_line_through', taskCheckBox.checked);
-  (taskCheckBox.checked ? completedTasksHolder : incompleteTaskHolder).appendChild(listItem);
+  (taskCheckBox.checked ? completedTasksList : todoTasksList).appendChild(taskListItem);
 };
 
 const handleTaskCheck = function (event) {
@@ -139,10 +136,10 @@ const bindTaskEvents = function (taskListItem) {
   deleteButton.onclick = deleteTask;
 };
 
-incompleteTaskHolder.addEventListener('change', handleTaskCheck);
-completedTasksHolder.addEventListener('change', handleTaskCheck);
-addButton.addEventListener('click', addTask);
-[...incompleteTaskHolder.children, ...completedTasksHolder.children].forEach(bindTaskEvents);
+todoTasksList.addEventListener('change', handleTaskCheck);
+completedTasksList.addEventListener('change', handleTaskCheck);
+addTaskButton.addEventListener('click', addTask);
+[...todoTasksList.children, ...completedTasksList.children].forEach(bindTaskEvents);
 // Issues with usability don't get seen until they are in front of a human tester.
 
 //prevent creation of empty tasks.
