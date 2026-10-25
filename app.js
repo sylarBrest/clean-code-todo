@@ -22,14 +22,14 @@ const createNewTaskElement = function (taskTitle) {
   editInput.className = 'item__input item__text item__text_display_none';
   editInput.id = `task-${nextTaskId}`;
 
-  const editButton = document.createElement('button'); //edit button
-  editButton.innerText = 'Edit'; //innerText encodes special characters, HTML does not.
+  const editButton = document.createElement('button');
+  editButton.innerText = 'Edit';
   editButton.className = 'item__button item__button_edit';
 
-  const deleteButton = document.createElement('button'); //delete button
+  const deleteButton = document.createElement('button');
   deleteButton.className = 'item__button button-delete item__button_delete';
 
-  const deleteButtonImg = document.createElement('img'); //delete button image
+  const deleteButtonImg = document.createElement('img');
   deleteButtonImg.src = './remove.svg';
   deleteButtonImg.className = 'button-delete__image';
   deleteButtonImg.alt = 'remove';
