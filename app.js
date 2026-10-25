@@ -103,8 +103,8 @@ const bindTaskEvents = function (taskListItem) {
   const editButton = taskListItem.querySelector('.item__button_edit');
   const deleteButton = taskListItem.querySelector('.item__button_delete');
 
-  editButton.onclick = editTask;
-  deleteButton.onclick = deleteTask;
+  editButton.addEventListener('click', editTask);
+  deleteButton.addEventListener('click', deleteTask);
 };
 
 todoTasksList.addEventListener('change', handleTaskCheck);
