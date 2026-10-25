@@ -73,7 +73,7 @@ const addTask = function () {
 
   //Append listItem to incompleteTaskHolder
   incompleteTaskHolder.appendChild(listItem);
-  bindTaskEvents(listItem, taskCompleted);
+  bindTaskEvents(listItem);
 
   taskInput.value = '';
 };
@@ -113,35 +113,23 @@ const deleteTask = function () {
   ul.removeChild(listItem);
 };
 
-//Mark task completed
-const taskCompleted = function () {
-  //Append the task list item to the .completed__list
-  const listItem = this.parentNode;
-  const listItemLabel = listItem.getElementsByClassName('item__label')[0];
-  listItemLabel.classList.add('item__label_line_through');
-  completedTasksHolder.appendChild(listItem);
-  bindTaskEvents(listItem, taskIncomplete);
+const onTaskCompletionChange = function (listItem) {
+  const taskCheckBox = listItem.querySelector('.item__checkbox');
+  const taskLabel = listItem.querySelector('.item__label');
+
+  taskLabel.classList.toggle('item__label_line_through', taskCheckBox.checked);
+  (taskCheckBox.checked ? completedTasksHolder : incompleteTaskHolder).appendChild(listItem);
 };
 
-const taskIncomplete = function () {
-  //Mark task as incomplete.
-  //When the checkbox is unchecked
-  //Append the task list item to the .todo__list.
-  const listItem = this.parentNode;
-  const listItemLabel = listItem.getElementsByClassName('item__label')[0];
-  listItemLabel.classList.remove('item__label_line_through');
-  incompleteTaskHolder.appendChild(listItem);
-  bindTaskEvents(listItem, taskCompleted);
+const handleTaskCheck = function (event) {
+  if (!event.target.classList.contains('item__checkbox')) return;
+  onTaskCompletionChange(event.target.closest('.list__item'));
 };
 
 //The glue to hold it all together.
 
-//Set the click handler to the addTask function.
-addButton.onclick = addTask;
-
-const bindTaskEvents = function (taskListItem, checkBoxEventHandler) {
+const bindTaskEvents = function (taskListItem) {
   //select ListItems children
-  const checkBox = taskListItem.querySelector('.item__checkbox');
   const editButton = taskListItem.querySelector('.item__button_edit');
   const deleteButton = taskListItem.querySelector('.item__button_delete');
 
@@ -149,23 +137,12 @@ const bindTaskEvents = function (taskListItem, checkBoxEventHandler) {
   editButton.onclick = editTask;
   //Bind deleteTask to delete button.
   deleteButton.onclick = deleteTask;
-  //Bind taskCompleted to checkBoxEventHandler.
-  checkBox.onchange = checkBoxEventHandler;
 };
 
-//cycle over incompleteTaskHolder ul list items
-//for each list item
-for (let i = 0; i < incompleteTaskHolder.children.length; i++) {
-  //bind events to list items chldren(tasksCompleted)
-  bindTaskEvents(incompleteTaskHolder.children[i], taskCompleted);
-}
-
-//cycle over completedTasksHolder ul list items
-for (let i = 0; i < completedTasksHolder.children.length; i++) {
-  //bind events to list items chldren(tasksIncompleted)
-  bindTaskEvents(completedTasksHolder.children[i], taskIncomplete);
-}
-
+incompleteTaskHolder.addEventListener('change', handleTaskCheck);
+completedTasksHolder.addEventListener('change', handleTaskCheck);
+addButton.addEventListener('click', addTask);
+[...incompleteTaskHolder.children, ...completedTasksHolder.children].forEach(bindTaskEvents);
 // Issues with usability don't get seen until they are in front of a human tester.
 
 //prevent creation of empty tasks.
